@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Blog</title>
+    <style>
+        body {
+            background-color: black;  
+            color: white;             
+            font-family: Arial, sans-serif;  
+            margin: 0;
+            padding: 20px;           
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: white;            
+        }
+
+        p {
+            color: white;            
+        }
+
+        a {
+            color: gray;             
+        }
+
+        a:hover {
+            color: purple;           
+        }
+
+        blockquote {
+            border-left: 5px solid gray;  
+            padding-left: 10px;           
+            margin: 10px 0;               
+            color: lightgray;              
+        }
+    </style>
+</head>
+<body >
+    <header>
+        <nav>
+            <ul>
+                
+                <li><a href="/">Home</a></li>
+                
+                <li><a href="/post">Post</a></li>
+                
+                <li><a href="/about">About</a></li>
+                
+                <li><a href="/link">Link</a></li>
+                
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <p>接下来均以普通用户admin进行操作
+我的成功安装xorg与hyprland且可正常使用的平台
+1. S410p笔记本
+2. e5-2651v2+R9 270/HD7750+pve虚拟机(q35机型)</p>
+
+<h2>安装xorg与hyprland</h2>
+
+<h3>安装对应驱动</h3>
+
+<h4>intel显卡</h4>
+
+<pre><code>sudo pkg install drm-kmod
+# sudo pkg install xf86-video-intel # 可选
+sudo sysrc kld_list+=i915kms
+</code></pre>
+
+<h4>amd独显(暂不支持amd核显，据说要等到freebsd15.0)</h4>
+
+<pre><code>sudo pkg install drm-kmod
+# sudo pkg install xf86-video-intel # 可选
+sudo sysrc kld_list+=amdgpu # 对于 HD7000 之后或 Tahiti 图形卡
+sudo sysrc kld_list+=radeonkms # 对于较旧的显卡（HD7000 之前或 Tahiti 之前）
+</code></pre>
+
+<h4>nvidia独显（对于较新的显卡）</h4>
+
+<pre><code>sudo pkg install nvidia-driver
+sudo sysrc kld_list+=nvidia-modeset
+</code></pre>
+
+<h4>nvidia独显（对于较旧的显卡）</h4>
+
+<p><a href="https://docs.freebsd.org/en/books/handbook/x11/#x-graphic-card-drivers">https://docs.freebsd.org/en/books/handbook/x11/#x-graphic-card-drivers</a>
+直接看文档吧</p>
+
+<h3>安装软件包并启用系统服务</h3>
+
+<pre><code>sudo pw groupmod video -m username
+sudo pkg install xorg dbus sddm wayland seatd hyprland xdg-desktop-portal-hyprland # hyprland本体
+sudo pkg install alacritty waybar pavucontrol yazi rofi-wayland git neovim wl-clipboard # 常用工具
+sudo sysrc dbus_enable=&quot;YES&quot;
+sudo sysrc sddm_enable=&quot;YES&quot;
+sudo sysrc hald_enable=&quot;YES&quot;
+sudo sysrc seatd_enable=&quot;YES&quot;
+sudo sysrc jackd_enable=&quot;YES&quot;
+sudo sysrc linux_enable=&quot;YES&quot; # 配置linux兼容
+</code></pre>
+
+<p>运行后输入</p>
+
+<pre><code>sudo reboot
+</code></pre>
+
+<p>重启系统，如果运气好，可以直接进入sddm，并且sddm上面的会话会显示Hyprland，这种情况就是非常成功</p>
+
+<h3>报错1：<code>XDG_RUNTIME_DIR is not set</code></h3>
+
+<p>可能会遇见报错<code>XDG_RUNTIME_DIR is not set</code>
+在 shell 的 rc 文件中添加以下内容（例如 .shrc、.bashrc）：</p>
+
+<pre><code>export XDG_RUNTIME_DIR=/var/run/user/`id -u``
+</code></pre>
+
+<p>这个在freebsd14.1中已经解决，会自动帮你设置</p>
+
+<h3>报错2：virtulbox虚拟机开不起来hyprland与xorg</h3>
+
+<p>hyprland貌似解决不了
+<a href="https://wiki.hyprland.org/Getting-Started/Quick-start/">Quick Start | Hyprland Wiki</a>
+官方说hyprland无法运行在虚拟机里面。
+xorg的话
+vbox虚拟机无法启动xorg，提示找不到显示器，那是因为没装显示驱动。
+记得先在vbox设置把显示-显卡控制器改为VBoxSVGA
+然后执行</p>
+
+<pre><code>pkg install virtualbox-ose-additions-6.1.50
+
+startx # 检验是否可以开启xorg
+</code></pre>
+
+<h3>报错3：平台是老式英特尔笔记本，还是无法开启xorg</h3>
+
+<p>如果还不行，运行</p>
+
+<pre><code>Xorg -configure
+</code></pre>
+
+<p>将生成的xorg.conf.new复制走</p>
+
+<pre><code>cp xorg.conf.new /usr/local/etc/X11/xorg.conf.d/xorg.conf
+vi /usr/local/etc/X11/xorg.conf.d/xorg.conf
+</code></pre>
+
+<p>将里面Device部分的Driver项改成对应的模块<a href="https://docs.freebsd.org/en/books/handbook/x11/#x-graphic-card-drivers">Chapter 5. The X Window System | FreeBSD Documentation Portal</a>
+几个论坛的例子
+<a href="https://forums.freebsd.org/threads/startx-bad-display-name.8003/">startX bad display name | The FreeBSD Forums</a><a href="https://forums.freebsd.org/threads/startx-bad-display-name.8003/">startX bad display name | The FreeBSD Forums</a>
+<a href="https://forums.freebsd.org/threads/thinkpad-e130-hd-4000-failed-to-load-module-intel.72048/">Solved - Thinkpad E130 - HD 4000 - Failed to load module &ldquo;intel&rdquo; | The FreeBSD Forums</a></p>
+
+<h3>报错4：平台13代英特尔+RTX 4060笔记本，无法开启xorg或wayland</h3>
+
+<p>测试，在bios使用核显独显混合模式，根据官方文档进行配置，无法使用wayland
+在bios使用独显模式，无法开启xorg
+这是硬件兼容的问题，无解，最好不要使用俩张显卡或者显卡加上独显的设备</p>
+
+    </main>
+
+    <footer>
+        <nav>
+            <ul>
+                
+                <li><a href="https://github.com">Github</a></li>
+                
+                <li><a href="https://gitlab.com">Gitlab</a></li>
+                
+            </ul>
+        </nav>
+    </footer>
+</body>
+</html>

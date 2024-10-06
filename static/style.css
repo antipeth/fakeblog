@@ -1,0 +1,23 @@
+body {
+    background-color: black; /* 背景颜色 */
+    color: white;            /* 字体颜色 */
+    font-family: Arial, sans-serif; /* 字体 */
+    margin: 0;
+    padding: 20px;          /* 内边距 */
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: white;           /* 标题字体颜色 */
+}
+
+p {
+    color: white;           /* 段落字体颜色 */
+}
+
+a {
+    color: gray;            /* 链接颜色 */
+}
+
+a:hover {
+    color: purple;          /* 悬停时链接颜色 */
+}

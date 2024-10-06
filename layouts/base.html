@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Site.Title }}</title>
+    <style>
+        body {
+            background-color: black; /* 背景颜色 */
+            color: white;            /* 字体颜色 */
+            font-family: Arial, sans-serif; /* 字体 */
+            margin: 0;
+            padding: 20px;          /* 内边距 */
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: white;           /* 标题字体颜色 */
+        }
+
+        p {
+            color: white;           /* 段落字体颜色 */
+        }
+
+        a {
+            color: gray;            /* 链接颜色 */
+        }
+
+        a:hover {
+            color: purple;          /* 悬停时链接颜色 */
+        }
+
+        blockquote {
+            border-left: 5px solid gray; /* 引用左侧边框 */
+            padding-left: 10px;          /* 引用内边距 */
+            margin: 10px 0;              /* 引用外边距 */
+            color: lightgray;             /* 引用字体颜色 */
+        }
+    </style>
+</head>
+<body >
+    <header>
+        <nav>
+            <ul>
+                {{ range .Site.Menu }}
+                <li><a href="{{ .URL }}">{{ .Name }}</a></li>
+                {{ end }}
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {{ .Content }}
+    </main>
+
+    <footer>
+        <nav>
+            <ul>
+                {{ range .Site.Contact }}
+                <li><a href="{{ .URL }}">{{ .Name }}</a></li>
+                {{ end }}
+            </ul>
+        </nav>
+    </footer>
+</body>
+</html>

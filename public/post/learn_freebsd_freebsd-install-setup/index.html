@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Blog</title>
+    <style>
+        body {
+            background-color: black;  
+            color: white;             
+            font-family: Arial, sans-serif;  
+            margin: 0;
+            padding: 20px;           
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: white;            
+        }
+
+        p {
+            color: white;            
+        }
+
+        a {
+            color: gray;             
+        }
+
+        a:hover {
+            color: purple;           
+        }
+
+        blockquote {
+            border-left: 5px solid gray;  
+            padding-left: 10px;           
+            margin: 10px 0;               
+            color: lightgray;              
+        }
+    </style>
+</head>
+<body >
+    <header>
+        <nav>
+            <ul>
+                
+                <li><a href="/">Home</a></li>
+                
+                <li><a href="/post">Post</a></li>
+                
+                <li><a href="/about">About</a></li>
+                
+                <li><a href="/link">Link</a></li>
+                
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2>更新系统</h2>
+
+<p>先以root身份登陆，因为没有sudo，所以普通用户不能获得管理员权限，后面会安装</p>
+
+<pre><code>pkg update
+</code></pre>
+
+<p>在这一布可能会遇见问题，报错如下</p>
+
+<pre><code>admin@freebsd ~&gt; sudo pkg install inxi
+Updating FreeBSD repository catalogue...
+pkg: No SRV record found for the repo 'FreeBSD'
+pkg: packagesite URL error for pkg+http://pkg.FreeBSD.org/FreeBSD:13:amd64/quarterly/packagesite.pkg -- pkg+:// implies SRV mirror type
+pkg: packagesite URL error for pkg+http://pkg.FreeBSD.org/FreeBSD:13:amd64/quarterly/packagesite.txz -- pkg+:// implies SRV mirror type
+Unable to update repository FreeBSD
+Error updating repositories!
+
+admin@freebsd ~ [3]&gt; pkg search inxi
+pkg: Repository FreeBSD missing. 'pkg update' required
+pkg: Repository FreeBSD cannot be opened. 'pkg update' required
+
+admin@freebsd ~ [1]&gt; sudo pkg update
+Updating FreeBSD repository catalogue...
+pkg: No SRV record found for the repo 'FreeBSD'
+Fetching meta.conf: 100%    163 B   0.2kB/s    00:01    
+pkg: packagesite URL error for pkg+http://pkg.FreeBSD.org/FreeBSD:13:amd64/quarterly/packagesite.pkg -- pkg+:// implies SRV mirror type
+pkg: packagesite URL error for pkg+http://pkg.FreeBSD.org/FreeBSD:13:amd64/quarterly/packagesite.txz -- pkg+:// implies SRV mirror type
+Unable to update repository FreeBSD
+Error updating repositories!
+</code></pre>
+
+<p>提取报错，就是找不到pkg源的SRV记录</p>
+
+<pre><code>pkg: No SRV record found for the repo 'FreeBSD'
+</code></pre>
+
+<p><a href="https://forums.freebsd.org/threads/problems-with-pkg-1-20-8.90655/">problems with pkg 1.20.8 | The FreeBSD Forums</a>
+解决方法如下</p>
+
+<pre><code class="language-sh">mkdir -p /usr/local/etc/pkg/repos
+cp /etc/pkg/FreeBSD.conf /usr/local/etc/pkg/repos/
+vi /usr/local/etc/pkg/repos/FreeBSD.conf
+</code></pre>
+
+<p>将：</p>
+
+<pre><code class="language-FreeBSD.conf"># $FreeBSD$
+#
+# To disable this repository, instead of modifying or removing this file,
+# create a /usr/local/etc/pkg/repos/FreeBSD.conf file:
+#
+#   mkdir -p /usr/local/etc/pkg/repos
+#   echo &quot;FreeBSD: { enabled: no }&quot; &gt; /usr/local/etc/pkg/repos/FreeBSD.conf
+#
+
+FreeBSD: {
+  url: &quot;pkg+http://pkg.FreeBSD.org/${ABI}/quarterly&quot;,
+  mirror_type: &quot;srv&quot;,
+  signature_type: &quot;fingerprints&quot;,
+  fingerprints: &quot;/usr/share/keys/pkg&quot;,
+  enabled: yes
+}
+</code></pre>
+
+<p>改为：</p>
+
+<pre><code class="language-FreeBSD.conf"># $FreeBSD$
+#
+# To disable this repository, instead of modifying or removing this file,
+# create a /usr/local/etc/pkg/repos/FreeBSD.conf file:
+#
+#   mkdir -p /usr/local/etc/pkg/repos
+#   echo &quot;FreeBSD: { enabled: no }&quot; &gt; /usr/local/etc/pkg/repos/FreeBSD.conf
+#
+
+FreeBSD: {
+  url: &quot;http://pkg.FreeBSD.org/${ABI}/quarterly&quot;,
+  mirror_type: &quot;http&quot;,
+  signature_type: &quot;fingerprints&quot;,
+  fingerprints: &quot;/usr/share/keys/pkg&quot;,
+  enabled: yes
+}
+</code></pre>
+
+<p>这是官方管理员给出的解决方案。
+再执行更新</p>
+
+<pre><code>pkg update
+</code></pre>
+
+<p>安装sudo</p>
+
+<pre><code class="language-sh">pw groupmod wheel -m username
+pkg install sudo
+visudo
+</code></pre>
+
+<p>接下来弹出vi编辑器，在其中找到</p>
+
+<pre><code class="language-sh">## Same thing without a password
+</code></pre>
+
+<p>把下面那行的注释取消(就是下面那行的#号删掉，使用hjkl移到到那个需要删除的位置，按x，就可以删除光标所在的字符)。然后按<code>ESC</code>,再输入<code>:wq</code>保存并退出。
+然后就可以使用sudo了，这是可以使用</p>
+
+<pre><code>exit # 注销当前用户，重新以之前创建的普通用户身份登录
+</code></pre>
+
+<p>或者</p>
+
+<pre><code>su admin # 切换回之前创建的普通用户admin
+</code></pre>
+
+    </main>
+
+    <footer>
+        <nav>
+            <ul>
+                
+                <li><a href="https://github.com">Github</a></li>
+                
+                <li><a href="https://gitlab.com">Gitlab</a></li>
+                
+            </ul>
+        </nav>
+    </footer>
+</body>
+</html>

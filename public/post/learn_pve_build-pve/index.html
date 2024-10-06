@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Blog</title>
+    <style>
+        body {
+            background-color: black;  
+            color: white;             
+            font-family: Arial, sans-serif;  
+            margin: 0;
+            padding: 20px;           
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: white;            
+        }
+
+        p {
+            color: white;            
+        }
+
+        a {
+            color: gray;             
+        }
+
+        a:hover {
+            color: purple;           
+        }
+
+        blockquote {
+            border-left: 5px solid gray;  
+            padding-left: 10px;           
+            margin: 10px 0;               
+            color: lightgray;              
+        }
+    </style>
+</head>
+<body >
+    <header>
+        <nav>
+            <ul>
+                
+                <li><a href="/">Home</a></li>
+                
+                <li><a href="/post">Post</a></li>
+                
+                <li><a href="/about">About</a></li>
+                
+                <li><a href="/link">Link</a></li>
+                
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <p>从去年就买了一个服务器主板和相关配件学习装机，一直都没用起来。开学后想着利用起来，开个pve玩玩。</p>
+
+<h2>硬件配置</h2>
+
+<p>|Item|name|price|
+|-|-|-|
+|主板|x79浪潮m2220(2011针)|152￥|
+|cpu|至强e5-2651v2 x 2|26x2=52￥|
+|内存|1866Mhz镁光16G ddr3服务器内存条 x 2|27x2=54￥|
+|散热器|杂牌塔式散热 x 2|29x2=58￥|
+|显卡|盈通游戏高手R9 270|120￥|
+|硬盘|梵想ssd固态128G|79￥|
+|电源|华为服务器电源750w+电源转接板+模组线|41+71+65=177￥|
+|机箱|开放式机箱|39￥|
+|总计||731￥|</p>
+
+<h2>主板介绍</h2>
+
+<p>|Item|name|
+|-|-|
+|主板尺寸|E-ATX 30.5cm x 33.2cm|
+|内存|4通道 20个ddr3|
+|sata|2个sata3 8个sata2|
+|pcie|3个pci-e 16x 3个pci-e 8x|
+|usb|3个usb2|
+|vga|板载显卡，有1个vga口|
+|网口|2个千兆网口(intel i350芯片) 1个远程口(IPMI)|</p>
+
+<h2>注意事项</h2>
+
+<h3>显卡</h3>
+
+<p>显卡别看pci-e 16x 有3个，能支持的显卡长度必须小于18.5cm，不然会顶到内存插槽，且如果显卡宽度大于1.5cm,则会把旁边的那个pcie口一起占用。
+板载显卡在某些情况（非正常情况）下可能会有冲突。</p>
+
+<h3>散热器</h3>
+
+<p>注意买标准的长方形2011针，不是正方形。</p>
+
+<h2>BIOS设置</h2>
+
+<p>按<code>Del</code>进bios</p>
+
+<h3>cpu</h3>
+
+<p>vt-d开启，虚拟化开启
+cpu的几个增强设置全部打开</p>
+
+<h3>硬盘</h3>
+
+<p><code>Advanced</code>-&gt;<code>SATA Configuration</code>-&gt;<code>SATA Mode</code> ,把<code>IDE Mode</code>改为<code>AHCI Mode</code></p>
+
+<h3>视频输出信号走板载显卡改为走独显</h3>
+
+<p><code>Chipset</code>-&gt;<code>CPU Advanced Settings</code>-&gt;<code>IOH Configuration</code>-&gt;<code>VGA Priority</code>,把<code>Onboard</code>改为<code>Offboard</code></p>
+
+<h2>安装pve</h2>
+
+<p>没什么好说的，直接安装即可</p>
+
+<h2>pve注意事项</h2>
+
+<h3>使用无线网卡联网</h3>
+
+<p>无线网卡连接手机热点，并使用nat配置给虚拟机联网，我使用这种方法有问题，虚拟机内无网络(我看别人的相关文章，无线网卡连接的是路由器wifi，成功配置网络。)</p>
+
+<h3>使用usb联网</h3>
+
+<p>usb网路共享也有问题，每次需要手动配置网络接口。使用以下脚本
+通过手机 rndis 自动联网配置
+效果是：手机线连接 pve 开启 USB 网络共享后，5秒左右自动配置好 rndis 网络</p>
+
+<p>代码部分：</p>
+
+<p>/etc/systemd/system/rndis.service</p>
+
+<pre><code>[Unit]
+Description=Run RNDIS script every 5 seconds
+After=network.target
+
+[Service]
+ExecStart=bash /root/rndis.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+
+<p>/root/rndis.sh</p>
+
+<pre><code>#!/bin/bash
+
+ANDROID_USB_IP=&quot;192.168.42.100&quot;
+ANDROID_USB_GATEWAY=&quot;192.168.42.1&quot;
+ANDROID_USB_SUBNET=&quot;255.255.255.0&quot;
+PVE_DEFAULT_GATEWAY=&quot;192.168.100.1&quot;
+
+# 获取 enx 开头的网卡设备名称
+enx_interface=$(ip a | grep &quot;enx[0-9a-f:]*:&quot; | awk '{print $2}' | head -n 1 | sed 's/:$//')
+
+# 检查是否获取到网卡名称
+if [ -z &quot;$enx_interface&quot; ]; then
+  echo &quot;Error: Could not find enx interface.&quot;
+  exit 1
+fi
+
+# 打印输出网卡名称
+echo &quot;Detected enx interface: $enx_interface&quot;
+
+# 备份 /etc/network/interfaces
+if [ -f /etc/network/interfaces.bak ]; then
+  rm /etc/network/interfaces.bak
+  echo &quot;Delete original backup.&quot;
+fi
+cp /etc/network/interfaces /etc/network/interfaces.bak
+echo &quot;Backup /etc/network/interfaces&quot;
+
+# 检查 /etc/network/interfaces 是否包含 enx[mac] 字段
+if grep -q &quot;enx[0-9a-f]*&quot; /etc/network/interfaces; then
+  # 检查是否与新获取的网卡名称相同
+  if grep -q &quot;$enx_interface&quot; /etc/network/interfaces; then
+    echo &quot;Network interface name already matches, no changes made.&quot;
+  else
+    # 替换 /etc/network/interfaces 中的网卡名称
+    sed -i &quot;s/enx[0-9a-f]*/$enx_interface/g&quot; /etc/network/interfaces
+    echo &quot;Network interface name updated in /etc/network/interfaces.&quot;
+  fi
+else
+  # 追加新的网卡配置
+  cat &gt;&gt; /etc/network/interfaces &lt;&lt;EOF
+
+auto $enx_interface
+iface $enx_interface inet static
+        address $ANDROID_USB_IP
+        netmask $ANDROID_USB_SUBNET
+        gateway $ANDROID_USB_GATEWAY
+EOF
+  echo &quot;New network interface configuration appended to /etc/network/interfaces.&quot;
+fi
+
+# 删除旧路由并添加新路由
+ip route delete default via $PVE_DEFAULT_GATEWAY
+ip route add default via $ANDROID_USB_GATEWAY
+
+echo &quot;Network configuration updated successfully.&quot;
+
+# 检查网络连接
+if ! ping -c 1 1.1.1.1 &gt; /dev/null 2&gt;&amp;1; then
+    echo &quot;Network is down, restarting networking service...&quot;
+    # 仅当网络不可用时重启网络服务
+    systemctl restart networking.service
+else
+    echo &quot;Network is up.&quot;
+fi
+    echo &quot;Done.&quot;
+</code></pre>
+
+<h2>开启直通</h2>
+
+<p>参考<a href="https://pve.sqlsec.com/4/2/">国光的教程</a>
+以下是自己配的</p>
+
+<h3>开启IOMMU</h3>
+
+<pre><code>nano /etc/default/grub
+</code></pre>
+
+<p>将</p>
+
+<pre><code>GRUB_CMDLINE_LINUX_DEFAULT=&quot;quiet&quot;
+</code></pre>
+
+<p>改为(包含直通优化，关闭显卡以节能的相关参数)</p>
+
+<pre><code>GRUB_CMDLINE_LINUX_DEFAULT=&quot;quiet intel_iommu=on iommu=pt textonly nomodeset nofb pci=noaer pcie_acs_override=downstream,multifunction video=vesafb:off video=efifb:off video=simplefb:off initcall_blacklist=sysfb_init&quot;
+</code></pre>
+
+<p>然后使用</p>
+
+<pre><code>update-grub
+</code></pre>
+
+<p>验证IOMMU是否开启</p>
+
+<pre><code>dmesg | grep -e DMAR -e IOMMU
+</code></pre>
+
+<p>出现<code>DMAR: IOMMU enabled</code>则说明开启成功，还不行重启后再看一下。</p>
+
+<h3>添加 VFIO 模块</h3>
+
+<p>为了我们的显卡顺利直通，需要添加 VFIO 模块到 /etc/modules 文件中：</p>
+
+<pre><code class="language-Bash">echo &quot;vfio&quot; &gt; /etc/modules
+echo &quot;vfio_iommu_type1s&quot; &gt;&gt; /etc/modules
+echo &quot;vfio_pci&quot; &gt;&gt; /etc/modules
+echo &quot;vfio_virqfd&quot; &gt;&gt; /etc/modules
+</code></pre>
+
+<p>将常见的驱动程序加入黑名单，即让 GPU 相关设备在下次系统启动之后不使用这些驱动，把设备腾出来给 vfio 驱动用：</p>
+
+<pre><code class="language-Bash">echo &quot;blacklist nvidiafb&quot; &gt;&gt; /etc/modprobe.d/blacklist.conf
+echo &quot;blacklist nouveau&quot; &gt;&gt; /etc/modprobe.d/blacklist.conf
+echo &quot;blacklist nvidia&quot; &gt;&gt; /etc/modprobe.d/blacklist.conf
+echo &quot;blacklist radeon&quot; &gt;&gt; /etc/modprobe.d/blacklist.conf
+echo &quot;blacklist amdgpu&quot; &gt;&gt; /etc/modprobe.d/blacklist.conf
+echo &quot;blacklist snd_hda_intel&quot; &gt;&gt; /etc/modprobe.d/blacklist.conf
+echo &quot;blacklist snd_hda_codec_hdmi&quot; &gt;&gt; /etc/modprobe.d/blacklist.conf
+echo &quot;blacklist i915&quot; &gt;&gt; /etc/modprobe.d/blacklist.conf
+</code></pre>
+
+<p>然后更新内核重启机器：</p>
+
+<pre><code class="language-Bash">update-initramfs -u &amp;&amp; reboot
+</code></pre>
+
+<h3>验证 IOMMU 中断重新映射是否已启用</h3>
+
+<pre><code>dmesg | grep 'remapping'
+</code></pre>
+
+<p>看到以下行之一：</p>
+
+<pre><code>AMD-Vi: Interrupt remapping enabled
+DMAR-IR: Enabled IRQ remapping in x2apic mode
+</code></pre>
+
+<h3>不知道这是啥</h3>
+
+<pre><code>nano /etc/modprobe.d/pve-blacklist.conf
+</code></pre>
+
+<p>添加</p>
+
+<pre><code>options vfio_iommu_type1 allow_unsafe_interrupts=1
+</code></pre>
+
+<h3>生成显卡romfile</h3>
+
+<p>在window下，使用gpu-z提取。
+把<code>.rom文件</code>（我的是R9-270.rom）放到pve的<code>/usr/share/kvm/</code>目录下面
+在虚拟机配置下添加pcie设备，选择显卡，勾选主<code>gpu</code>和<code>rombar</code>
+编辑虚拟机配置</p>
+
+<pre><code>nano /etc/pve/qemu-server/100.conf
+</code></pre>
+
+<p>修改</p>
+
+<pre><code># hostpci0: 01:00
+hostpci0: 01:00,x-vga=1,romfile=R9-270.rom
+</code></pre>
+
+<h3>配置硬盘直通</h3>
+
+<p>参考<a href="https://foxi.buduanwang.vip/virtualization/1754.html/">佛西博客</a>
+我们可以通过下面命令，列出当前的硬盘列表</p>
+
+<pre><code>ls -la /dev/disk/by-id/|grep -v dm|grep -v lvm|grep -v part
+</code></pre>
+
+<p>如下面的例子</p>
+
+<pre><code>root@pve:~# ls -la /dev/disk/by-id/|grep -v dm|grep -v lvm|grep -v part
+total 0
+drwxr-xr-x 2 root root 540 Apr 28 16:39 .
+drwxr-xr-x 6 root root 120 Mar  3 15:52 ..
+lrwxrwxrwx 1 root root  13 Apr 28 16:39 nvme-eui.01000000010000005cd2e431fee65251 -&gt; ../../nvme2n1
+lrwxrwxrwx 1 root root  13 Mar  3 15:52 nvme-eui.334843304aa010020025385800000004 -&gt; ../../nvme1n1
+lrwxrwxrwx 1 root root  13 Apr 28 17:36 nvme-eui.334843304ab005400025385800000004 -&gt; ../../nvme0n1
+lrwxrwxrwx 1 root root  13 Apr 28 16:39 nvme-INTEL_SSDPE2KX020T8_BTLJ039307142P0BGN -&gt; ../../nvme2n1
+lrwxrwxrwx 1 root root  13 Mar  3 15:52 nvme-SAMSUNG_MZWLL800HEHP-00003_S3HCNX0JA01002 -&gt; ../../nvme1n1
+lrwxrwxrwx 1 root root  13 Apr 28 17:36 nvme-SAMSUNG_MZWLL800HEHP-00003_S3HCNX0JB00540 -&gt; ../../nvme0n1
+lrwxrwxrwx 1 root root   9 Mar  3 15:52 scsi-35000c500474cd7eb -&gt; ../../sda
+lrwxrwxrwx 1 root root   9 Mar  3 15:52 wwn-0x5000c500474cd7eb -&gt; ../../sda
+</code></pre>
+
+<p>nvme开头的是nvme硬盘，ata开头是走sata或者ata通道的设备。，scsi是scsi设备-阵列卡raid或者是直通卡上的硬盘。
+我们可以通过<code>qm set &lt;vmid&gt; --scsiX /dev/disk/by-id/xxxxxxx</code> 进行RDM直通</p>
+
+<pre><code>#   虚拟机编号 控制器类型编号 物理磁盘挂载点
+qm set 101 --scsi1 /dev/disk/by-id/nvme-INTEL_SSDPE2KX020T8_BTLJ039307142P0BGN
+</code></pre>
+
+<h3>将镜像写成磁盘格式</h3>
+
+<pre><code>#                    虚拟机编号           存放镜像的位置                                      储存池
+qm disk import 100 /var/lib/vz/template/iso/openwrt.img local-lvm
+</code></pre>
+
+<p>参考连接
+<a href="https://pve.proxmox.com/wiki/PCI_Passthrough#Verify_IOMMU_is_enabled">https://pve.proxmox.com/wiki/PCI_Passthrough#Verify_IOMMU_is_enabled</a>
+<a href="https://www.bilibili.com/opus/848481909029732376?spm_id_from=333.976.0.0">https://www.bilibili.com/opus/848481909029732376?spm_id_from=333.976.0.0</a>
+<a href="https://www.bilibili.com/read/cv34418465/">https://www.bilibili.com/read/cv34418465/</a>
+<a href="https://pve.sqlsec.com/7/4/#_2">https://pve.sqlsec.com/7/4/#_2</a></p>
+
+<h2>配置省电</h2>
+
+<p>安装<code>cpupower</code></p>
+
+<pre><code>apt install cpupower
+
+# 设置所有CPU为节能模式
+cpupower -c all frequency-set -g powersave
+
+# 设置所有CPU为性能模式
+cpupower -c all frequency-set -g performance
+编辑 root 用户的 crontab:
+</code></pre>
+
+<p>命令重启后设置的会失效，下面持久化这个命令，让其开机自动执行</p>
+
+<pre><code class="language-bash">sudo crontab -e
+</code></pre>
+
+<p>添加以下内容以在启动时运行命令:</p>
+
+<pre><code>@reboot /usr/bin/cpupower -c all frequency-set -g powersave
+</code></pre>
+
+    </main>
+
+    <footer>
+        <nav>
+            <ul>
+                
+                <li><a href="https://github.com">Github</a></li>
+                
+                <li><a href="https://gitlab.com">Gitlab</a></li>
+                
+            </ul>
+        </nav>
+    </footer>
+</body>
+</html>

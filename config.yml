@@ -1,0 +1,22 @@
+
+# Blog configuration
+title: "My Blog"
+description: "This is my blog"
+
+# header
+menu:
+  - name: "Home"
+    url: "/"
+  - name: "Post"
+    url: "/post"
+  - name: "About"
+    url: "/about"
+  - name: "Link"
+    url: "/link"
+
+# footer
+contact:
+  - name: "Github"
+    url: "https://github.com"
+  - name: "Gitlab"
+    url: "https://gitlab.com"

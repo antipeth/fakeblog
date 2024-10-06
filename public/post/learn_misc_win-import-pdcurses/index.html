@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Blog</title>
+    <style>
+        body {
+            background-color: black;  
+            color: white;             
+            font-family: Arial, sans-serif;  
+            margin: 0;
+            padding: 20px;           
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: white;            
+        }
+
+        p {
+            color: white;            
+        }
+
+        a {
+            color: gray;             
+        }
+
+        a:hover {
+            color: purple;           
+        }
+
+        blockquote {
+            border-left: 5px solid gray;  
+            padding-left: 10px;           
+            margin: 10px 0;               
+            color: lightgray;              
+        }
+    </style>
+</head>
+<body >
+    <header>
+        <nav>
+            <ul>
+                
+                <li><a href="/">Home</a></li>
+                
+                <li><a href="/post">Post</a></li>
+                
+                <li><a href="/about">About</a></li>
+                
+                <li><a href="/link">Link</a></li>
+                
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>一.配置C++环境</h1>
+
+<h2>1.下载MinGW</h2>
+
+<p>选用mingw。</p>
+
+<p>首先，打开<a href="https://winlibs.com/#download-release">官方网站</a>，选择最新的适合自己的版本下载。</p>
+
+<p>如果不知道下什么，可以点此<a href="https://github.com/brechtsanders/winlibs_mingw/releases/download/14.1.0posix-18.1.5-11.0.1-ucrt-r1/winlibs-x86_64-posix-seh-gcc-14.1.0-llvm-18.1.5-mingw-w64ucrt-11.0.1-r1.zip">链接</a>进行下载。
+下载后，解压到非中文路径。</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/01.avif" alt="" /></p>
+
+<p>在例子中，我是直接解压到c盘下面。</p>
+
+<h2>2.添加环境变量</h2>
+
+<p>打开window设置。</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/02.avif" alt="" /></p>
+
+<p>点击关于(about)</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/03.avif" alt="" /></p>
+
+<p>点击高级系统设置(Advanced system settings)。</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/04.avif" alt="" /></p>
+
+<p>点击环境变量。</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/05.avif" alt="" /></p>
+
+<p>选中path那一行后，点击编辑。</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/06.avif" alt="" /></p>
+
+<p>点击新建，把你的mingw64\bin全部路径输进去。由于我的路径是<code>C:\mingw64\bin</code>，所以我添加的是C:\mingw64\bin。如果你的路径是<code>C:\Progra Files\mingw64\bin</code>，那你就添加C:\Progra Files\mingw64\bin。以此类推。</p>
+
+<p>添加完成后点击确定。关闭剩下的窗口。</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/07.avif" alt="" /></p>
+
+<p>按<code>Win</code>+<code>R</code>键，输入cmd，点击确定，打开命令提示符窗口。</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/08.avif" alt="" /></p>
+
+<p>在命令提示符窗口中输入：</p>
+
+<pre><code class="language-cmd">g++ --version
+</code></pre>
+
+<p>若又输出版本号，即成功配置c++环境。</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/09.avif" alt="" /></p>
+
+<h1>二.导入PDCurses库</h1>
+
+<h2>1.下载源码</h2>
+
+<p>访问<a href="[Releases · wmcbrine/PDCurses · GitHub](https://github.com/wmcbrine/PDCurses/releases">官方下载网站</a>)，找到最新的版本下载，不知道下什么可以点此<a href="https://github.com/wmcbrine/PDCurses/archive/refs/tags/3.9.zip">链接</a>下载。</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/10.avif" alt="" /></p>
+
+<p>下载后解压出来。</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/11.avif" alt="" /></p>
+
+<h2>2.编译源码</h2>
+
+<p>进入<code>wincon</code>文件夹。</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/12.avif" alt="" /></p>
+
+<p>在此位置打开终端，如果不会，直接在上面的文件路径栏输<code>cmd</code>然后回车。</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/13.avif" alt="" /></p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/14.avif" alt="" /></p>
+
+<p>成功打开，且路径在这个文件夹下面。</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/15.avif" alt="" /></p>
+
+<p>输入：</p>
+
+<pre><code class="language-cmd">mingw32-make -f Makefile
+</code></pre>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/16.avif" alt="" /></p>
+
+<p>回车，等待代码滚完。</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/17.avif" alt="" />
+<a href="../blog/learn_pve_pve-hackintosh.md">learn/pve/pve-hackintosh</a></p>
+
+<h2>3.将编译出来的东西添加到MinGW的库中</h2>
+
+<p>打开<code>PDCurses-3.9\wincon</code>这个文件夹，里面将里面一个叫<code>pdcurses.a</code>的文件复制到<code>mingw64\lib</code>目录下面，并重命名为名叫<code>libpdcurses.a</code></p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/18.avif" alt="" /></p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/19.avif" alt="" /></p>
+
+<p>打开<code>PDCurses-3.9</code>这个文件夹，把<code>curses.h</code>、<code>curspriv.h</code>和<code>panel.h</code>这三个头文件复制到<code>mingw64\include</code>目录下面。</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/20.avif" alt="" /></p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/21.avif" alt="" /></p>
+
+<p>至此导入成功，下面进行测试。</p>
+
+<h2>4.测试</h2>
+
+<p>找个地方创建<code>test.cpp</code>。</p>
+
+<pre><code class="language-test.cpp">#include &lt;cstring&gt;
+#include &lt;curses.h&gt;
+
+int main(){
+    initscr();
+    raw();
+    noecho();
+    curs_set(0);
+
+    char* c = &quot;Hello, World!&quot;;
+
+    mvprintw(LINES/2, (COLS-strlen(c))/2,c);
+    refresh();
+
+    getch();
+    endwin();
+    
+    return 0;
+}
+
+</code></pre>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/22.avif" alt="" /></p>
+
+<p>然后在该目录下打开命令提示符。并输入：</p>
+
+<pre><code class="language-cmd">g++ -o test test.cpp -lpdcurses
+</code></pre>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/23.avif" alt="" /></p>
+
+<p>这里警告不要管他，已经编译成功了。在该文件夹下面生成了<code>test.exe</code>。</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/24.avif" alt="" /></p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/25.avif" alt="" /></p>
+
+<p>点击运行这个<code>test.exe</code>。</p>
+
+<p>看到hello world，测试成功。PDCurses库可以正常使用。</p>
+
+<p><img src="https://img.0pt.icu/learn/misc/win-import-pdcurses/26.avif" alt="" /></p>
+
+    </main>
+
+    <footer>
+        <nav>
+            <ul>
+                
+                <li><a href="https://github.com">Github</a></li>
+                
+                <li><a href="https://gitlab.com">Gitlab</a></li>
+                
+            </ul>
+        </nav>
+    </footer>
+</body>
+</html>
